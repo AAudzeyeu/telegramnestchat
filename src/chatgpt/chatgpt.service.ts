@@ -24,7 +24,7 @@ interface GptAnswer {
 }
 @Injectable()
 export class ChatgptService {
-    private  readonly logger = new Logger(ChatgptService.name);
+    private readonly logger = new Logger(ChatgptService.name);
     private gptUrl;
     private apiKey;
     constructor(private readonly configService: ConfigService, private readonly httpService: HttpService) {
@@ -32,7 +32,7 @@ export class ChatgptService {
         this.apiKey = this.configService.get('GPT_API');
     }
 
-    generateResponce(content: string): Observable<string> {
+    generateResponse(content: string): Observable<string> {
         const headers = {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.apiKey}`
@@ -45,7 +45,7 @@ export class ChatgptService {
         return this.httpService.post<GptAnswer>(this.gptUrl, data, { headers }).pipe(
           map(({data}) => data.choices[0].message.content.trim()), catchError((err) => {
               this.logger.error(err);
-              return of('Произошла ошибка');
+              return of('Слишком сложно');
             })
         );
     }

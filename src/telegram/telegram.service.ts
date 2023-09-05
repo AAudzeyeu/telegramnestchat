@@ -20,7 +20,7 @@ export class TelegramService extends  Telegraf<Context> {
 
     @On('text')
     onMessage(@Message('text') message: string) {
-        return this.gpt.generateResponce(message);
+        return this.gpt.generateResponse(message);
     }
 
 }
