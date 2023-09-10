@@ -10,17 +10,20 @@ import { tiktoken, Endcoding } from "tiktoken";
 
 
 
-class bcolors {
-    static HEADER: string = '\033[95m';
-    static OKBLUE: string = '\033[94m';
-    static OKCYAN: string = '\033[96m';
-    static OKGREEN: string = '\033[92m';
-    static WARNING: string = '\033[93m';
-    static FAIL: string = '\033[91m';
-    static ENDC: string = '\033[0m';
-    static BOLD: string = '\033[1m';
-    static UNDERLINE: string = '\033[4m';
-}
+// class bcolors {
+//
+//     constructor() {}
+//
+//     static HEADER: string = '\033[95m'
+//     static OKBLUE: string = '\033[94m';
+//     static OKCYAN: string = '\033[96m';
+//     static OKGREEN: string = '\033[92m';
+//     static WARNING: string = '\033[93m';
+//     static FAIL: string = '\033[91m';
+//     static ENDC: string = '\033[0m';
+//     static BOLD: string = '\033[1m';
+//     static UNDERLINE: string = '\033[4m';
+// }
 
 // Здесь просто создаётся класс bcolors, как в пайтоне.
 // Тут статические свойства, это цветовые коды ANSI для форматирования текста в терминале, я их пока что указал через точку,.
@@ -45,7 +48,9 @@ class GPT {
             const openaiApiKey: string = passwordInput.value;
             openai.api_key = openaiApiKey;
             process.env.OPENAI_API_KEY = openaiApiKey;
-            console.log(`${bcolors.OKGREEN}${bcolors.BOLD}Ключ сохранен!${bcolors.ENDC}`);
+            // console.log(`${bcolors.OKGREEN}${bcolors.BOLD}Ключ сохранен!${bcolors.ENDC}`);
+            console.log(`Ключ сохранен!`);
+
             passwordInput.style.display = 'none';
             loginButton.style.display = 'none';
         });
@@ -197,7 +202,9 @@ class GPT {
         let user: string = "";
         let dialog: string = "";
 
-        console.log(`${bcolors.OKBLUE}${bcolors.BOLD}С чем связан ваш интерес к искусственному интеллекту?${bcolors.ENDC}`);
+        // console.log(`${bcolors.OKBLUE}${bcolors.BOLD}С чем связан ваш интерес к искусственному интеллекту?${bcolors.ENDC}`);
+        console.log(`С чем связан ваш интерес к искусственному интеллекту?`);
+
 
         while (user.toLowerCase() !== "stop" && user.toLowerCase() !== "exit" && user.toLowerCase() !== "выход") {
             user = prompt('Клиент: ') || '';
@@ -207,12 +214,19 @@ class GPT {
             const addDialog: string = this.answer(expertPrompt, user);
 
             dialog += '\n\n' + 'Менеджер: ' + addDialog;
-            console.log(`\n${bcolors.OKBLUE}${bcolors.BOLD}Менеджер:${bcolors.ENDC} ${this.insertNewlines(addDialog)}`);
+            // console.log(`\n${bcolors.OKBLUE}${bcolors.BOLD}Менеджер:${bcolors.ENDC} ${this.insertNewlines(addDialog)}`);
+            console.log(`\n Менеджер: ${this.insertNewlines(addDialog)}`);
             const report: string = this.answer(validationPrompt, dialog);
             const answer: string = this.answer(actionPrompt, report);
 
-            console.log(`\n${bcolors.OKGREEN}${bcolors.BOLD}Отчёт системы:\n ${bcolors.ENDC}${report}`);
-            console.log(`\n${bcolors.HEADER}${bcolors.BOLD}Менеджер: ${bcolors.ENDC}${this.insertNewlines(answer)}\n\n`);
+            // console.log(`\n${bcolors.OKGREEN}${bcolors.BOLD}Отчёт системы:\n ${bcolors.ENDC}${report}`);
+            // console.log(`\n${bcolors.HEADER}${bcolors.BOLD}Менеджер: ${bcolors.ENDC}${this.insertNewlines(answer)}\n\n`);
+
+            console.log(`\n Отчёт системы:\n ${report}`);
+            console.log(`\n Менеджер: ${bcolors.ENDC}${this.insertNewlines(answer)}\n\n`);
+
+
+
         }
 
         return dialog;
