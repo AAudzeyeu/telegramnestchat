@@ -1,13 +1,15 @@
-import openai  from 'openAI';
+import {OpenAI} from 'openai';
+import * as openai from 'openai';
 import {CharacterTextSplitter} from 'langchain/text_splitter';
 import {Chroma} from 'langchain/vectorstores';
 import {Document} from 'langchain/document';
 import {OpenAIEmbeddings} from 'langchain/embeddings/openai';
-import { ChatCompletion} from 'openai/resources/chat';
 import axios from 'axios';
-import { request } from 'express';
 import tiktoken, { TiktokenEncoding } from 'tiktoken';
-import * as Core from 'openai/src/core';
+import { ChatgptService } from 'src/chatgpt/chatgpt.service';
+import { ConfigService } from '@nestjs/config';
+import { Chat, Completions } from 'openai/resources';
+import ChatCompletionMessageParam = Chat.ChatCompletionMessageParam;
 
 
 // class bcolors {
@@ -30,10 +32,10 @@ import * as Core from 'openai/src/core';
 
 
 class GPT {
-    CHAT_GPT_API_KEY = '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';
-    GOOGLE_DOC_ID = '1puZ57detTnlx9RMUU9Jyw0nynn0JsJPhO8o8jrYeCaY';
+    clientChatGpt = new OpenAI({ apiKey: this.configService.get('GPT_API') });
 
-    constructor() {}
+    constructor(private chatGPTService: ChatgptService,
+                private readonly configService: ConfigService,) {}
 
 
     // Метод setKey создает элементы ввода пароля и кнопки авторизации в веб-интерфейсе.
@@ -65,7 +67,7 @@ class GPT {
 
     private getDocumentText(): string {
         const response = axios
-            .get(`https://docs.google.com/document/d/${this.GOOGLE_DOC_ID}/export?format=txt`)
+            .get(`https://docs.google.com/document/d/${this.configService.get('GOOGLE_DOC_ID')}/export?format=txt`)
             .catch(err => console.error(err));
         console.log(response);
         // TODO нада проверить что возвращается!!!
@@ -115,19 +117,19 @@ class GPT {
     // с использованием библиотеки Chroma.
     // Кроме того, расчитывается количество токенов в документе и его стоимость на основе числа токенов.
 
-    answer(system: string, topic: string, temp: number = 1): string {
-        const messages: { role: string; content: string }[] = [
+    async answer(system: string, topic: string, temp: number = 1) {
+        const messages: ChatCompletionMessageParam[] = [
             { role: 'system', content: system },
             { role: 'user', content: topic },
         ];
 
-        const completion = {
-            'model': 'gpt-3.5-turbo',
-            'messages': `${messages}`,
-            'temperature': 'temp',
-        };
+        const completion = await this.clientChatGpt.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages,
+            temperature: temp,
+        });
 
-        return completion.choices[0].message.content;
+        return completion;
     }
 
     //Метод answer принимает системное сообщение, тему и температуру и возвращает ответ от модели GPT-3.5 Turbo, используя OpenAI API, как настройка бота.
@@ -223,13 +225,13 @@ class GPT {
     // Этот метод запускает диалог между клиентом и менеджером, где клиент вводит текстовые сообщения.
     // Он использует метод answer для генерации ответов менеджера и выводит их в консоль.
 
-    answerIndex(system: string, topic: string, searchIndex: Chroma, temp: number = 1, verbose: number = 0): void {
+    async answerIndex(system: string, topic: string, searchIndex: Chroma, temp: number = 1, verbose: number = 0): void {
         const docs: any[] = searchIndex.similaritySearch(topic, 5);
         if (verbose) console.log('\n ===========================================: ');
         const messageContent: string = docs.map((doc, i) => `\nОтрывок документа №${i + 1}\n=====================${doc.page_content}\n`).join('\n ');
         if (verbose) console.log('message_content :\n ======================================== \n', messageContent);
 
-        const messages: { role: string; content: string }[] = [
+        const messages: ChatCompletionMessageParam[] = [
             { role: 'system', content: system + `${messageContent}` },
             { role: 'user', content: topic },
         ];
@@ -237,7 +239,7 @@ class GPT {
         if (verbose) console.log('\n ===========================================: ');
         if (verbose) console.log(`${this.numTokensFromMessages(messages, 'gpt-3.5-turbo-0301')} токенов использовано на вопрос`);
 
-        const completion: ChatCompletion = openai.Chat.Completions.create({
+        const completion = await this.clientChatGpt.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: messages,
             temperature: temp,
@@ -248,20 +250,20 @@ class GPT {
         if (verbose) console.log('\n ===========================================: ');
         console.log('ЦЕНА запроса с ответом :', 0.002 * (completion['usage']['total_tokens'] / 1000), ' $');
         if (verbose) console.log('\n ===========================================: ');
-        console.log('ОТВЕТ : \n', this.insertNewlines(completion.choices[0].message.content));
+        console.log('ОТВЕТ : \n', this.insertNewlines(completion.  choices[0].message.content));
     }
 
     // Этот метод выполняет поиск похожих документов в индексе (searchIndex) на основе заданной темы (topic).
     // Затем он генерирует ответ системы с учетом найденных документов и выводит его в консоль.
     // Также он выводит информацию о количестве использованных токенов и стоимости запроса.
 
-    getChatGptAnswer3(system: string, topic: string, searchIndex: Chroma, temp: number = 1): void {
-        const messages: { role: string; content: string }[] = [
+    async getChatGptAnswer3(system: string, topic: string, searchIndex: Chroma, temp: number = 1): void {
+        const messages: ChatCompletionMessageParam[] = [
             { role: 'system', content: system },
             { role: 'user', content: topic },
         ];
 
-        const completion: ChatCompletion = openai.Chat.Completions.bind({
+        const completion = await this.clientChatGpt.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: messages,
             temperature: temp,
