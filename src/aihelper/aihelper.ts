@@ -30,8 +30,8 @@ import * as Core from 'openai/src/core';
 
 
 class GPT {
-    CHAT_GPT_API_KEY = '';
-    GOOGLE_DOC_ID = '';
+    CHAT_GPT_API_KEY = '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';
+    GOOGLE_DOC_ID = '1puZ57detTnlx9RMUU9Jyw0nynn0JsJPhO8o8jrYeCaY';
 
     constructor() {}
 
@@ -121,11 +121,11 @@ class GPT {
             { role: 'user', content: topic },
         ];
 
-        const completion =openai.Chat.Completions.bind( {
-            model: 'gpt-3.5-turbo',
-            messages: messages,
-            temperature: temp,
-        });
+        const completion = {
+            'model': 'gpt-3.5-turbo',
+            'messages': `${messages}`,
+            'temperature': 'temp',
+        };
 
         return completion.choices[0].message.content;
     }
@@ -133,7 +133,7 @@ class GPT {
     //Метод answer принимает системное сообщение, тему и температуру и возвращает ответ от модели GPT-3.5 Turbo, используя OpenAI API, как настройка бота.
 
     numTokensFromMessages(messages: any[], model: string = 'gpt-3.5-turbo-0301'): number {
-        function encodingForModel(model: string): void {
+        function encodingForModel(model: any): any {
             try {
                 return tiktoken.encoding_for_model(model);
             } catch (error) {
@@ -237,7 +237,7 @@ class GPT {
         if (verbose) console.log('\n ===========================================: ');
         if (verbose) console.log(`${this.numTokensFromMessages(messages, 'gpt-3.5-turbo-0301')} токенов использовано на вопрос`);
 
-        const completion: ChatCompletion = openai.Chat.Completions.bind({
+        const completion: ChatCompletion = openai.Chat.Completions.create({
             model: 'gpt-3.5-turbo',
             messages: messages,
             temperature: temp,
