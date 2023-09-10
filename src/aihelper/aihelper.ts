@@ -122,9 +122,9 @@ class GPT {
         ];
 
         const completion = {
-            'model': 'gpt-3.5-turbo',
-            'messages': `${messages}`,
-            'temperature': 'temp',
+            model: 'gpt-3.5-turbo',
+            messages: `${messages}`,
+            temperature: 'temp',
         };
 
         return completion.choices[0].message.content;
@@ -237,7 +237,7 @@ class GPT {
         if (verbose) console.log('\n ===========================================: ');
         if (verbose) console.log(`${this.numTokensFromMessages(messages, 'gpt-3.5-turbo-0301')} токенов использовано на вопрос`);
 
-        const completion: ChatCompletion = openai.Chat.Completions.create({
+        const completion: ChatCompletion = openai.Completion.create({
             model: 'gpt-3.5-turbo',
             messages: messages,
             temperature: temp,
