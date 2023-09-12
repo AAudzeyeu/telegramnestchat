@@ -31,6 +31,8 @@
     "nestjs-telegraf": "^2.7.0",
     "oauth2client": "^1.0.0",
     "openai": "^4.4.0",
+    "os": "^0.1.2",
+    "re": "^0.1.4",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
     "rxjs": "^7.8.1",
