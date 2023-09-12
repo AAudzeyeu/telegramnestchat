@@ -117,7 +117,7 @@ class WorkerOpenAI {
     get_chatgpt_answer(topic: string): void {
 
         this.docs = await this.search_index.similaritySearch(topic, 4);
-        this.message_content = re.sub(r'\n{2}', ' ', '\n '.join([f'\n=====' + doc.page_content + '\n' for i, doc in enumerate(this.docs)]));
+        this.message_content = re.sub(r'\n{2}', ' ', '\n '.join([f'\n=====' + doc.pageContent + '\n' for i, doc in enumerate(this.docs)]));
 
         const messages = [
             { "role": "system", "content": this.chat_manager_system },
